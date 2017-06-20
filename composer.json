@@ -4,7 +4,7 @@
     "type": "library",
     "require": {
       "gungnir-mvc/core": "dev-master",
-      "gungnir-mvc/http": "dev-master",
+      "gungnir-mvc/http": "v1.*",
       "gungnir-mvc/framework": "dev-master",
       "gungnir-mvc/event": "dev-master"
     },

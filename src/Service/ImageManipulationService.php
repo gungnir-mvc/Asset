@@ -85,6 +85,7 @@ class ImageManipulationService implements ImageManipulationServiceInterface
      * Resize passed image
      *
      * @param \Imagick $image
+     * @throws ImageManipulationServiceException
      * @param Int $height
      * @param Int $width
      *
@@ -105,7 +106,6 @@ class ImageManipulationService implements ImageManipulationServiceInterface
      * @param Int $amount
      * @param bool $up
      *
-     * @throws ImageManipulationServiceException
      * @return \Imagick
      */
     public function scale(\Imagick $image, Int $amount, Bool $up = false): \Imagick

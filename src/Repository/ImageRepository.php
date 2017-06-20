@@ -7,8 +7,8 @@ use Gungnir\Asset\Service\ImageManipulationServiceInterface;
 
 class ImageRepository implements ImageRepositoryInterface
 {
-    /** @var Container|null */
-    private $container = null;
+    /** @var string */
+    private $imageBasePath = null;
 
     /** @var ImageManipulationServiceInterface */
     private $imageManipulationService = null;
@@ -19,26 +19,28 @@ class ImageRepository implements ImageRepositoryInterface
      * @param Container $container
      * @param ImageManipulationServiceInterface $imageManipulationService
      */
-    public function __construct(Container $container, ImageManipulationServiceInterface $imageManipulationService)
+    public function __construct(String $imageBasePath, ImageManipulationServiceInterface $imageManipulationService)
     {
-        $this->container = $container;
+        $this->imageBasePath = $imageBasePath;
         $this->imageManipulationService = $imageManipulationService;
     }
 
     /**
-     * @return Container|null
+     * @return string
      */
-    public function getContainer()
+    public function getImageBasePath(): string
     {
-        return $this->container;
+        return $this->imageBasePath;
     }
 
     /**
-     * @param Container|null $container
+     * @param string $imageBasePath
+     * @return ImageRepository
      */
-    public function setContainer($container)
+    public function setImageBasePath(string $imageBasePath): ImageRepository
     {
-        $this->container = $container;
+        $this->imageBasePath = $imageBasePath;
+        return $this;
     }
 
     /**
@@ -72,23 +74,23 @@ class ImageRepository implements ImageRepositoryInterface
         // Outputs something like imagename_height_width.extension
         $realImageName = $this->getRealImageName($imageName, $options);
         $options = empty($options) ? $this->extractOptionsFromImageName($imageName) : $options;
-        $root = $this->getContainer()->get('Application')->getRoot();
-        $imagePath =  $root . '/images/' . $imageName;
-        $realImagePath =  $root . '/images/' . $realImageName;
+
+        $imagePath =  $this->getImageBasePath() . $imageName;
+        $realImagePath =  $this->getImageBasePath() . $realImageName;
 
         $imageExists = file_exists($imagePath);
         $realImageExists = file_exists($realImagePath);
 
         if (strcmp($imageName, $realImageName) === 0 && $imageExists) {
             // Both names are the same and it exists so load it
-            $image = new \Imagick(realpath($imagePath));
+            $image = new \Imagick($imagePath);
         } elseif ($realImageExists) {
             // Names are not the same but the alternative image exists
-            $image = new \Imagick(realpath($realImagePath));
+            $image = new \Imagick($realImagePath);
         } else {
             // Image names differs so we must load existing image apply options and further save it
             $baseImageName = $this->extractBaseImageName($imageName);
-            $baseImagePath = $root . '/images/' . $baseImageName;
+            $baseImagePath = $this->getImageBasePath() . $baseImageName;
 
             if (file_exists($baseImagePath) !== true) {
                 throw new ImageRepositoryException('Image ' . $baseImageName . ' does not exist');
@@ -107,10 +109,16 @@ class ImageRepository implements ImageRepositoryInterface
                 $this->getImageManipulationService()->scale($image, $scale);
             }
 
-            $image->writeImage((count($options) > 0) ? $realImagePath : $baseImagePath);
+            if (count($options) > 0) {
+                $fh = fopen($realImagePath, 'c+');
+            } else {
+                $fh = fopen($baseImagePath, 'c+');
+            }
+
+            $image->writeImageFile($fh);
+            fclose($fh);
 
         }
-
         return $image;
     }
 
