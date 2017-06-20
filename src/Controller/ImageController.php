@@ -1,6 +1,8 @@
 <?php
 namespace Gungnir\Asset\Controller;
 
+use Gungnir\Asset\PathString;
+use Gungnir\Event\GenericEventObject;
 use Gungnir\Framework\AbstractController;
 use Gungnir\HTTP\Request;
 use Gungnir\HTTP\Response;
@@ -19,8 +21,13 @@ class ImageController extends AbstractController
     public function getImageRepository(): ImageRepository
     {
         if (empty($this->imageRepository)) {
+            $imageRootPath = new PathString($this->getApplication()->getRootPath() . 'images/');
+            $this->getApplication()->getEventDispatcher()->emit(
+                'gungnir.asset.imagey.basepath',
+                new GenericEventObject($imageRootPath)
+            );
             $this->imageRepository = new ImageRepository(
-                $this->getApplication()->getRootPath() . 'images/',
+                $imageRootPath,
                     new ImageManipulationService()
             );
         }

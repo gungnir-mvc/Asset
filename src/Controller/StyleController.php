@@ -1,8 +1,10 @@
 <?php
 namespace Gungnir\Asset\Controller;
 
+use Gungnir\Asset\PathString;
 use Gungnir\Asset\Repository\Exception\StyleRepositoryException;
 use Gungnir\Asset\Repository\StyleRepository;
+use Gungnir\Event\GenericEventObject;
 use Gungnir\Framework\AbstractController;
 use Gungnir\HTTP\Request;
 use Gungnir\HTTP\Response;
@@ -19,8 +21,13 @@ class StyleController extends AbstractController
     public function getStyleRepository(): StyleRepository
     {
         if (empty($this->styleRepository)) {
+            $styleRootPath = new PathString($this->getApplication()->getRootPath() . 'css/');
+            $this->getApplication()->getEventDispatcher()->emit(
+                'gungnir.asset.styley.basepath',
+                new GenericEventObject($styleRootPath)
+                );
             $this->styleRepository = new StyleRepository(
-                $this->getApplication()->getRootPath() . 'css/'
+                $styleRootPath
             );
         }
         return $this->styleRepository;
