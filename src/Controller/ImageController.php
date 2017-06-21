@@ -24,7 +24,10 @@ class ImageController extends AbstractController
             $imageRootPath = new PathString($this->getApplication()->getRootPath() . 'images/');
             $this->getApplication()->getEventDispatcher()->emit(
                 'gungnir.asset.imagey.basepath',
-                new GenericEventObject($imageRootPath)
+                new GenericEventObject([
+                    'path' => $imageRootPath,
+                    'application' => $this->getApplication()
+                ])
             );
             $this->imageRepository = new ImageRepository(
                 $imageRootPath,

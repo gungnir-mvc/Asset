@@ -24,7 +24,10 @@ class StyleController extends AbstractController
             $styleRootPath = new PathString($this->getApplication()->getRootPath() . 'css/');
             $this->getApplication()->getEventDispatcher()->emit(
                 'gungnir.asset.styley.basepath',
-                new GenericEventObject($styleRootPath)
+                new GenericEventObject([
+                    'path' => $styleRootPath,
+                    'application' => $this->getApplication()
+                ])
                 );
             $this->styleRepository = new StyleRepository(
                 $styleRootPath
