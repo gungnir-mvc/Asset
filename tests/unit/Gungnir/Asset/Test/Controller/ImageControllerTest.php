@@ -2,7 +2,9 @@
 namespace Gungnir\Asset\Test\Controller;
 
 use Gungnir\Asset\Controller\ImageController;
+use Gungnir\Asset\ImageFile;
 use Gungnir\Asset\Repository\ImageRepository;
+use Gungnir\Asset\Repository\ImageRepositoryInterface;
 use Gungnir\Core\Application;
 use Gungnir\HTTP\Request;
 use Gungnir\HTTP\Response;
@@ -83,7 +85,7 @@ class ImageControllerTest extends PHPUnit_Framework_TestCase
         $app = new Application();
 
 
-//
+        /** @var ImageRepository $imageRepositoryMock */
 
         $controller = new ImageController($app);
         $controller->setImageRepository($imageRepositoryMock);
@@ -92,5 +94,37 @@ class ImageControllerTest extends PHPUnit_Framework_TestCase
         $response  = $controller->getIndex($request);
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals(Response::HTTP_OK, $response->statusCode());
+    }
+
+    /**
+     * @test
+     */
+    public function itCanUploadImage()
+    {
+        $app = new Application();
+        $image = new ImageFile('tmpname');
+        $imageRepositoryMock = $this->getMockBuilder(ImageRepository::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['storeImage'])
+            ->getMock();
+
+        $imageRepositoryMock->expects($this->atLeastOnce())
+            ->method('storeImage')
+            ->with($image, 'testimage.png')
+            ->will($this->returnValue(true));
+
+        /** @var ImageRepository $imageRepositoryMock */
+        $controller = new ImageController($app);
+        $controller->setImageRepository($imageRepositoryMock);
+
+        $request = new Request([], [], [], [], [
+            [
+                'tmp_name' => 'tmpname',
+                'name' => 'testimage.png'
+            ]
+        ], []);
+
+        $response = $controller->postUpload($request);
+        $this->assertInstanceOf(Response::class, $response);
     }
 }

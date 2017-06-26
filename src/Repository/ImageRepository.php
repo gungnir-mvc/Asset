@@ -1,6 +1,7 @@
 <?php
 namespace Gungnir\Asset\Repository;
 
+use Gungnir\Asset\ImageFile;
 use Gungnir\Core\Container;
 use Gungnir\Asset\Repository\Exception\ImageRepositoryException;
 use Gungnir\Asset\Service\ImageManipulationServiceInterface;
@@ -120,6 +121,21 @@ class ImageRepository implements ImageRepositoryInterface
 
         }
         return $image;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function storeImage(ImageFile $image, string $fileName): bool
+    {
+        try {
+            $image->open();
+            $stored = $image->move($this->getImageBasePath() . $fileName);
+            $image->close();
+        } catch (\Exception $e) {
+            $stored = false;
+        }
+        return $stored;
     }
 
     /**

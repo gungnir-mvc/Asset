@@ -1,6 +1,7 @@
 <?php
 namespace Gungnir\Asset\Controller;
 
+use Gungnir\Asset\ImageFile;
 use Gungnir\Asset\PathString;
 use Gungnir\Event\GenericEventObject;
 use Gungnir\Framework\AbstractController;
@@ -83,6 +84,41 @@ class ImageController extends AbstractController
 
         $response = new Response($image->getImageBlob());
         $response->setHeader('Content-type', $ctype);
+        return $response;
+    }
+
+    /**
+     * Takes POST data and uploads an image with it
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function postUpload(Request $request): Response
+    {
+        $this->getApplication()->getEventDispatcher()->emit(
+            'gungnir.asset.imagey.upload.request', new GenericEventObject([
+                'application' => $this->getApplication(),
+                'request' => $request
+            ])
+        );
+        $files = $request->files()->parameters();
+        $fileData = array_shift($files);
+        $response = new Response('', Response::HTTP_CREATED);
+        // No file in request
+        if (empty($fileData['tmp_name'])) {
+            $response->statusCode(Response::HTTP_BAD_REQUEST);
+            return $response;
+        }
+
+        $file = new ImageFile($fileData['tmp_name']);
+        $fileName = $fileData['name'];
+        $stored = $this->getImageRepository()->storeImage($file, $fileName);
+
+
+        if (!$stored) {
+            $response->statusCode(Response::HTTP_BAD_REQUEST);
+        }
+
         return $response;
     }
 }
