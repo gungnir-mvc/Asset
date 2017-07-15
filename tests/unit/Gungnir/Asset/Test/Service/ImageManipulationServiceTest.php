@@ -33,6 +33,22 @@ class ImageManipulationServiceTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function itCanResizeAnImageWithOnlyOneNonZeroValue()
+    {
+        $image = new \Imagick();
+        // Data of 1px h+w png image
+        $image->readImageBlob(base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII='));
+        $image->setImageBackgroundColor('#fff');
+        $service = new ImageManipulationService();
+        $image = $service->resize($image, 0, 5);
+
+        $this->assertEquals(5, $image->getImageHeight());
+        $this->assertEquals(5, $image->getImageWidth());
+    }
+
+    /**
+     * @test
+     */
     public function itCanScaleAnImage()
     {
         $image = new \Imagick();

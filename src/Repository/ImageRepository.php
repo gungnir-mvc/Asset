@@ -72,7 +72,7 @@ class ImageRepository implements ImageRepositoryInterface
      */
     public function getImage(String $imageName, array $options = []) : \Imagick
     {
-        // Outputs something like imagename_height_width.extension
+        // Outputs something like imageName_height_width.extension
         $realImageName = $this->getRealImageName($imageName, $options);
         $options = empty($options) ? $this->extractOptionsFromImageName($imageName) : $options;
 
@@ -102,8 +102,8 @@ class ImageRepository implements ImageRepositoryInterface
             $width  = $options['width'] ?? null;
             $scale  = $options['scale'] ?? null;
 
-            if ($height && $width) {
-                $this->getImageManipulationService()->resize($image, $height, $width);
+            if ($height || $width) {
+                $this->getImageManipulationService()->resize($image, (int) $height, (int) $width);
             }
 
             if ($scale) {
@@ -149,10 +149,16 @@ class ImageRepository implements ImageRepositoryInterface
         $fileInfo = pathinfo($imageName);
         $realImageName = $fileInfo['filename'];
 
-        if (isset($options['height']) && isset($options['width'])) {
-            $realImageName .= '_' . $options['height'] . '_' . $options['width'];
-        } elseif (isset($options['scale'])) {
+        if (isset($options['scale'])) {
+            // Who knows?
+        } else {
+            if (isset($options['height'])) {
+                $realImageName .= '_' . $options['height'];
+            }
 
+            if (isset($options['width'])) {
+                $realImageName .= '_' . $options['width'];
+            }
         }
 
         $realImageName .= '.' . $fileInfo['extension'];
@@ -170,9 +176,17 @@ class ImageRepository implements ImageRepositoryInterface
         $fileParts = pathinfo($imageName);
         $filenameParts = explode('_', $fileParts['filename']);
 
-        if (count($filenameParts) === 3) {
-            $options['height'] = $filenameParts[1];
-            $options['width'] = $filenameParts[2];
+        $fileNamePartIndex = [
+            'height',
+            'width'
+        ];
+
+        foreach ( $filenameParts AS $key => $filenamePart) {
+            if ($key === 0) {
+                continue;
+            } elseif (isset($fileNamePartIndex[$key])) {
+                $options[$fileNamePartIndex[$key]] = $filenamePart;
+            }
         }
 
         return $options;
