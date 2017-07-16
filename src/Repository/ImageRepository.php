@@ -8,6 +8,10 @@ use Gungnir\Asset\Service\ImageManipulationServiceInterface;
 
 class ImageRepository implements ImageRepositoryInterface
 {
+    const HEIGHT_REGEX = "/h[0-9]\d+/";
+    const WIDTH_REGEX = "/w[0-9]\d+/";
+    const SCALE_REGEX = "/s[0-9]\d+/";
+
     /** @var string */
     private $imageBasePath = null;
 
@@ -17,7 +21,7 @@ class ImageRepository implements ImageRepositoryInterface
     /**
      * ImageRepository constructor.
      *
-     * @param Container $container
+     * @param string $imageBasePath
      * @param ImageManipulationServiceInterface $imageManipulationService
      */
     public function __construct(String $imageBasePath, ImageManipulationServiceInterface $imageManipulationService)
@@ -150,14 +154,14 @@ class ImageRepository implements ImageRepositoryInterface
         $realImageName = $fileInfo['filename'];
 
         if (isset($options['scale'])) {
-            // Who knows?
+            $realImageName .= '_s' . $options['scale'];
         } else {
             if (isset($options['height'])) {
-                $realImageName .= '_' . $options['height'];
+                $realImageName .= '_h' . $options['height'];
             }
 
             if (isset($options['width'])) {
-                $realImageName .= '_' . $options['width'];
+                $realImageName .= '_w' . $options['width'];
             }
         }
 
@@ -172,24 +176,11 @@ class ImageRepository implements ImageRepositoryInterface
      */
     private function extractOptionsFromImageName($imageName) : array
     {
-        $options = [];
-        $fileParts = pathinfo($imageName);
-        $filenameParts = explode('_', $fileParts['filename']);
-
-        $fileNamePartIndex = [
-            'height',
-            'width'
+        return [
+            'height' => $this->extractOptionFromImageName($pattern = self::HEIGHT_REGEX, $haystack = $imageName),
+            'width'  => $this->extractOptionFromImageName($pattern = self::WIDTH_REGEX, $haystack = $imageName),
+            'scale'  => $this->extractOptionFromImageName($pattern = self::SCALE_REGEX, $haystack = $imageName),
         ];
-
-        foreach ( $filenameParts AS $key => $filenamePart) {
-            if ($key === 0) {
-                continue;
-            } elseif (isset($fileNamePartIndex[$key])) {
-                $options[$fileNamePartIndex[$key]] = $filenamePart;
-            }
-        }
-
-        return $options;
     }
 
     /**
@@ -201,5 +192,19 @@ class ImageRepository implements ImageRepositoryInterface
         $fileParts = pathinfo($imageName);
         $filenameParts = explode('_', $fileParts['filename']);
         return $filenameParts[0] . '.' . $fileParts['extension'];
+    }
+
+    /**
+     * @param string $pattern
+     * @param string $haystack
+     *
+     * @return string|null
+     */
+    private function extractOptionFromImageName(string $pattern, string $haystack): ?string
+    {
+        $matches = [];
+        preg_match($pattern, $haystack, $matches);
+        if (empty($matches)) return null;
+        return array_shift($matches);
     }
 }
