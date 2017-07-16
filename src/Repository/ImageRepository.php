@@ -205,6 +205,7 @@ class ImageRepository implements ImageRepositoryInterface
         $matches = [];
         preg_match($pattern, $haystack, $matches);
         if (empty($matches)) return null;
-        return array_shift($matches);
+        $match = array_shift($matches);
+        return trim($match, 'whs');
     }
 }
