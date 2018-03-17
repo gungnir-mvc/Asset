@@ -5,8 +5,9 @@ namespace Gungnir\Asset\Test\Repository;
 use Gungnir\Asset\Repository\StyleRepository;
 use Gungnir\Core\FileInterface;
 use org\bovigo\vfs\vfsStream;
+use \PHPUnit\Framework\TestCase;
 
-class StyleRepositoryTest extends \PHPUnit_Framework_TestCase
+class StyleRepositoryTest extends TestCase
 {
 
     /**

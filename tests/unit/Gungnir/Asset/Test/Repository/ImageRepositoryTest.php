@@ -5,8 +5,9 @@ use Gungnir\Asset\ImageFile;
 use Gungnir\Asset\Repository\ImageRepository;
 use Gungnir\Asset\Service\ImageManipulationService;
 use org\bovigo\vfs\vfsStream;
+use \PHPUnit\Framework\TestCase;
 
-class ImageRepositoryTest extends \PHPUnit_Framework_TestCase
+class ImageRepositoryTest extends TestCase
 {
     /**
      * @test

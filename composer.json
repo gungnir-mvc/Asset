@@ -9,7 +9,7 @@
       "gungnir-mvc/event": "dev-master"
     },
         "require-dev": {
-                "phpunit/phpunit": "5.5.*",
+                "phpunit/phpunit": "7.0.0",
                 "phpspec/prophecy": "~1.0",
                 "mikey179/vfsStream": "~1.6"
                 },

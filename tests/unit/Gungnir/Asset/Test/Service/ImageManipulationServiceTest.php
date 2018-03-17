@@ -2,8 +2,9 @@
 namespace Gungnir\Asset\Test\Service;
 
 use Gungnir\Asset\Service\ImageManipulationService;
+use \PHPUnit\Framework\TestCase;
 
-class ImageManipulationServiceTest extends \PHPUnit_Framework_TestCase
+class ImageManipulationServiceTest extends TestCase
 {
     /**
      * @test
